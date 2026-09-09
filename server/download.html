@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>创作助手 · 剧本工坊 — 下载</title>
+<style>
+  :root{
+    --brand:#6c5ce7; --brand2:#7f5af0; --ink:#2d3436; --muted:#7f8c9b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;color:var(--ink);background:#f5f6fa;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+
+  /* hero */
+  .hero{background:linear-gradient(135deg,#6c5ce7 0%,#8b5cf6 55%,#5a67f2 100%);color:#fff;padding:40px 20px 56px;text-align:center;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.12);top:-140px;right:-80px}
+  .hero::before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08);bottom:-100px;left:-60px}
+  .logo{font-size:56px;line-height:1;filter:drop-shadow(0 6px 16px rgba(0,0,0,.2));position:relative;z-index:1}
+  .hero h1{font-size:28px;font-weight:800;margin:12px 0 6px;position:relative;z-index:1}
+  .hero .tag{font-size:15px;opacity:.92;position:relative;z-index:1}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 14px;font-size:13px;margin-top:16px;position:relative;z-index:1}
+  .badge b{font-weight:800}
+
+  /* main card */
+  .card{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(30,40,80,.10);margin-top:-34px;position:relative;z-index:2;padding:28px 22px}
+
+  /* download */
+  .dl{text-align:center;margin-bottom:8px}
+  .dl .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-size:18px;font-weight:800;text-decoration:none;padding:16px 34px;border-radius:14px;box-shadow:0 10px 24px rgba(108,92,231,.38);transition:transform .12s,box-shadow .12s}
+  .dl .btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(108,92,231,.45)}
+  .dl .btn:disabled{background:#b8b0e8;box-shadow:none;cursor:not-allowed}
+  .dl .size{color:var(--muted);font-size:13px;margin-top:12px}
+  .qrrow{display:flex;align-items:center;gap:18px;background:#f0f2f8;border-radius:16px;padding:16px;margin-top:18px}
+  .qrrow img,.qrrow svg{width:132px;height:132px;border-radius:12px;border:1px solid #e5e7f0;background:#fff;flex:0 0 auto}
+  .qrrow .t{font-size:13.5px;color:#4a4f5c}
+  .qrrow .t b{color:var(--brand)}
+  .divider{height:1px;background:#eceff5;margin:26px 0}
+
+  /* section */
+  .sec-t{font-size:18px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .sec-t::before{content:"";width:4px;height:18px;border-radius:4px;background:var(--brand)}
+  .news{display:flex;flex-direction:column;gap:8px}
+  .news li{list-style:none;background:#f7f8fd;border:1px solid #eceffc;border-radius:12px;padding:11px 14px;font-size:14px;display:flex;gap:9px;align-items:flex-start}
+  .news li::before{content:"✨";flex:0 0 auto;font-size:15px}
+  .news li b{color:var(--brand)}
+
+  /* features grid */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .feat{background:#fff;border:1px solid #edeff5;border-radius:14px;padding:16px 14px}
+  .feat .ic{font-size:24px;margin-bottom:8px}
+  .feat h3{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--ink)}
+  .feat p{font-size:12.5px;color:var(--muted);line-height:1.55}
+
+  /* steps */
+  .steps{display:flex;flex-direction:column;gap:10px;counter-reset:s}
+  .steps li{list-style:none;display:flex;gap:12px;align-items:flex-start;background:var(--ink);background:#f0f2f8;border-radius:12px;padding:12px 14px;font-size:14px;color:#3a3f4b}
+  .steps li b{color:var(--brand)}
+  .steps .nbr{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  code{background:#fff;padding:1px 7px;border-radius:6px;font-size:12.5px;border:1px solid #e5e7f0;color:#4a4f5c}
+
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+  .hostbox{background:#f0f2f8;border-radius:12px;padding:12px 14px;font-size:13px;color:#4a4f5c;margin-bottom:6px}
+  .hostbox code{display:inline-block;margin:2px 0}
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="logo">🪄</div>
+  <h1>创作助手 · 剧本工坊</h1>
+  <p class="tag">画板式剧本创作工具 —— 小说 / 轻小说 / RPG / Galgame / 影视脚本</p>
+  <div class="badge">📦 最新版 <b>v1.29</b></div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+
+    <div class="dl">
+      <a class="btn" id="dlBtn" href="/apk/creation-studio.apk" download>⬇ 下载安卓版 APK</a>
+      <div class="size" id="dlSize">正在读取安装包大小…</div>
+    </div>
+
+    <div class="qrrow">
+      <img id="qr" src="/apk/qr.svg" alt="手机扫码下载">
+      <div class="t">
+        <b>📱 手机扫码下载</b><br>
+        扫码或点击上方按钮即可获取安卓安装包。支持 PWA：浏览器打开首页也可「添加到主屏幕」当 App 用。
+      </div>
+    </div>
+
+    <div class="hostbox">
+      <b>🌐 当前服务器地址</b><br>
+      本页地址：<code id="hostUrl">—</code><br>
+      <span style="color:var(--muted)">· 手机需与电脑连接<u>同一 Wi-Fi</u>才能访问局域网地址</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sec-t">✨ 本版更新（v1.29）</div>
+    <ul class="news">
+      <li><b>屏蔽边缘左右滑手势</b> — 全面屏返回手势不再误退出应用；上下滑保持系统默认</li>
+      <li><b>AI 生成记录分开</b> — 画布卡片与正文创作的 AI 历史各自独立记录、独立回退</li>
+      <li><b>画布专属「AI 历史」按钮</b> — 顶栏 🤖 一键查看/清空/恢复画布 AI 记录</li>
+      <li><b>顶部布局优化</b> — AI 历史按钮移至第二行最右（设置旁），仅留 🤖 图标</li>
+      <li><b>字数显示位置</b> — 富文本字数紧跟章节标题显示，更顺手</li>
+      <li><b>撤销/重做修复</b> — 严格单步撤销，单个操作可撤，操作有反馈</li>
+      <li><b>版本号自动递增</b> — 每次打包版本号+1，便于追踪</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="sec-t">🎯 核心功能</div>
+    <div class="grid">
+      <div class="feat"><div class="ic">🧱</div><h3>画板式自由排版</h3><p>卡片任意拖放/缩放，图片贴板，富文本正文，无限画布平移缩放，空格+拖拽、Ctrl+滚轮。</p></div>
+      <div class="feat"><div class="ic">🕸</div><h3>思维导图连线</h3><p>拖卡片锚点连线，中段拉分支节点，防重复连线；脑图/径向/网格一键布局。</p></div>
+      <div class="feat"><div class="ic">🗂</div><h3>项目 & 多页面</h3><p>多项目、多页面、文件夹分组，按幕/卷/地图分区创作；自动保存+回收站。</p></div>
+      <div class="feat"><div class="ic">✍️</div><h3>富文本编辑器</h3><p>标题/加粗/列表/表格/引用/代码块/颜色/荧光笔/链接/图片，接近 Word。</p></div>
+      <div class="feat"><div class="ic">🤖</div><h3>AI 助手</h3><p>OpenAI 兼容 API（DeepSeek/Kimi/通义…），12 个智能体预设，生成灵感/润色/建议。</p></div>
+      <div class="feat"><div class="ic">⚡</div><h3>灵感生成</h3><p>随机名字/剧情钩子/世界观种子/角色/事件/道具/任务/台词，灵感文库范例。</p></div>
+      <div class="feat"><div class="ic">🌐</div><h3>局域网实时协同</h3><p>同一 Wi-Fi 多人同时编辑，看得到彼此光标与在线成员，实时同步。</p></div>
+      <div class="feat"><div class="ic">☁️</div><h3>云盘同步</h3><p>WebDAV（坚果云/Nextcloud/Box…）自动备份，多版本快照，可恢复。</p></div>
+      <div class="feat"><div class="ic">🖊</div><h3>画笔标注</h3><p>画笔/橡皮擦，8 色色板+粗细滑杆，真擦除切段，平滑贝塞尔。</p></div>
+      <div class="feat"><div class="ic">🖨</div><h3>导出导入</h3><p>Markdown / HTML / Word / 纯文本 / JSON 备份，一键复制整本大纲。</p></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sec-t">📲 怎么安装</div>
+    <ol class="steps">
+      <li><span class="nbr">1</span><span>手机与电脑连接<b>同一 Wi-Fi</b>，电脑端保持本页面服务运行（<code>npm start</code>）。</span></li>
+      <li><span class="nbr">2</span><span>用手机<b>扫码</b>或直接点击上方「下载安卓版 APK」。</span></li>
+      <li><span class="nbr">3</span><span>打开下载的 APK，按系统提示允许「<b>安装未知来源应用</b>」。</span></li>
+      <li><span class="nbr">4</span><span>安装完成后打开即可使用，可选择 PWA 或 APK 两种方式。</span></li>
+    </ol>
+
+    <div class="divider"></div>
+
+    <div class="sec-t">🌐 局域网协同</div>
+    <ol class="steps">
+      <li><span class="nbr">1</span><span>电脑端启动服务器：<code>npm start</code>，记下打印的局域网地址。</span></li>
+      <li><span class="nbr">2</span><span>手机打开应用 → 「🌐 协同」→ 填地址（<code>http://电脑IP:8787</code>）→ 上传并连接。</span></li>
+      <li><span class="nbr">3</span><span>其他人浏览器访问该地址，「打开项目 → 从局域网服务器打开」选择同一项目。</span></li>
+    </ol>
+
+    <div class="footer">
+      🪄 创作助手 · 剧本工坊 v1.29 · 局域网分发版<br>
+      数据保存在电脑服务器 <code>data/</code> 目录；AI 密钥仅存本机浏览器。
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var host = location.host || 'localhost';
+  document.getElementById('hostUrl').textContent = location.origin + '/apk/';
+  // APK 大小
+  fetch('/apk/creation-studio.apk', {method:'HEAD'}).then(function(r){
+    var len = r.headers.get('content-length');
+    if(len){ var mb = (parseInt(len,10)/1024/1024).toFixed(1);
+      document.getElementById('dlSize').textContent = '安装包大小：' + mb + ' MB · 版本 v1.29 · Debug 签名（测试/内部分发）';
+    }
+  }).catch(function(){}).finally(function(){
+    // 若没拿到大小也给默认文案
+    var el = document.getElementById('dlSize');
+    if(!el.textContent || el.textContent.indexOf('正在')===0) el.textContent = 'Debug 签名，用于测试/内部分发';
+  });
+  // 二维码指向本页
+  var qr = document.getElementById('qr');
+  qr.src = '/apk/qr.svg?url=' + encodeURIComponent(location.origin + '/apk/');
+})();
+</script>
+</body>
+</html>

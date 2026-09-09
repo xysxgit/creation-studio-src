@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network security config (central control point).
+  This Capacitor app talks plaintext HTTP to LAN collaboration server
+  (server/index.js, default port 8787) and self hosted AI gateways
+  (Ollama / LM Studio / OpenWebUI). So cleartext cannot be globally
+  banned or these core features break (features must stay intact).
+  This file centralizes what was a bare usesCleartextTraffic=true in
+  AndroidManifest, giving one controlled place to tighten later:
+  to lock down for release, set base-config cleartextTrafficPermitted
+  to false and whitelist trusted hosts/IPs one by one below.
+-->
+<network-security-config>
+    <!-- Global baseline. Currently true to keep LAN HTTP working; set false for release. -->
+    <base-config cleartextTrafficPermitted="true" />
+
+    <!-- Always allow the local loopback. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- Always allow mDNS /.local LAN hosts, a common LAN-collab form. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">.local</domain>
+    </domain-config>
+</network-security-config>

@@ -1,0 +1,31 @@
+import { chromium } from 'playwright';
+const CHROME = '/root/.cache/ms-playwright/chromium-1234/chrome-linux/chrome';
+const browser = await chromium.launch({ headless: true, executablePath: CHROME, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8787/');
+await page.waitForSelector('.welcome', { timeout: 8000 });
+await page.evaluate(() => { localStorage.clear(); localStorage.setItem('cs.helpSeen', '1'); });
+await page.reload();
+await page.waitForSelector('.welcome');
+await page.click('text=＋ 新建项目');
+await page.click('.type-card:has-text("小说")');
+await page.click('.modal-actions .btn.primary');
+await page.waitForSelector('.canvas-wrap');
+await page.waitForTimeout(500);
+const box = await page.locator('.canvas-wrap').boundingBox();
+await page.mouse.dblclick(box.x + 300, box.y + 200);
+await page.waitForTimeout(500);
+// 放大
+await page.mouse.move(box.x + 400, box.y + 250);
+await page.keyboard.down('Control');
+for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, -120); await page.waitForTimeout(120); }
+await page.keyboard.up('Control');
+await page.waitForTimeout(400);
+const before = await page.evaluate(() => document.querySelector('.card').classList.contains('preview-mode'));
+await page.evaluate(() => { document.querySelector('.card-topbar-actions button:nth-child(1)')?.click(); });
+await page.waitForTimeout(300);
+const after = await page.evaluate(() => document.querySelector('.card').classList.contains('preview-mode'));
+console.log('放大后点预览按钮切换:', before !== after ? `✅ ${before}→${after}` : '❌');
+await browser.close();
+process.exit(0);

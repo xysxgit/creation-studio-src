@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f6fa" media="(prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#14151c" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="创作助手 · 从设定到 IP：画板式剧本创作工具，支持小说、轻小说、RPG 游戏剧本、Galgame 脚本与影视脚本，局域网协同创作。" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪄</text></svg>" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <script src="/theme-overrides.js?v=1" defer></script>
+    <script src="/select-inline.js?v=1" defer></script>
+    <title>创作助手 · 从设定到 IP</title>
+    <style>
+      html, body { height: 100%; margin: 0; }
+      body { background: #f5f6fa; color: #2d3436; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #14151c; color: #e8eaf2; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- theme-overrides.css 必须放在主样式之后加载，覆盖才能生效 -->
+    <link rel="stylesheet" href="/theme-overrides.css?v=2" />
+  </body>
+</html>

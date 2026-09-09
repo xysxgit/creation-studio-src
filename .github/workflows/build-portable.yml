@@ -1,0 +1,54 @@
+name: Build Windows portable
+
+on:
+  push:
+    tags:
+      - 'portable-*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Prepare portable dir
+        run: |
+          mkdir -p portable/server portable/data portable/runtime
+          cp -r dist portable/dist
+          cp server/index.js portable/server/
+          cp start.bat portable/启动.bat
+
+      - name: Download node runtime (win-x64)
+        run: |
+          curl -L -o /tmp/node-rt.zip https://npmmirror.com/mirrors/node/v20.18.0/node-v20.18.0-win-x64.zip
+          mkdir -p /tmp/node-rt
+          unzip -o /tmp/node-rt.zip -d /tmp/node-rt
+          cp /tmp/node-rt/node-v20.18.0-win-x64/node.exe portable/runtime/node.exe
+
+      - name: Install server runtime deps
+        working-directory: portable
+        run: |
+          printf '{"type":"module"}' > package.json
+          npm install --omit=dev express@4.19.2 ws@8.18.0 qrcode@1.5.4 --no-audit --no-fund
+
+      - name: Zip
+        run: |
+          (cd portable && zip -r ../creation-studio-portable.zip .)
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: creation-studio-portable.zip

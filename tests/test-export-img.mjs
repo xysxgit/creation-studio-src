@@ -1,0 +1,32 @@
+import { chromium } from 'playwright';
+const CHROME = '/root/.cache/ms-playwright/chromium-1234/chrome-linux/chrome';
+const browser = await chromium.launch({ headless: true, executablePath: CHROME, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8787/', { waitUntil: 'networkidle' });
+await page.evaluate(() => { localStorage.clear(); localStorage.setItem('cs.helpSeen', '1'); });
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(500);
+await page.click('text=＋ 新建项目');
+await page.click('.type-card:has-text("小说")');
+await page.click('.modal-actions .btn.primary');
+await page.waitForSelector('.canvas-wrap', { timeout: 6000 });
+await page.waitForTimeout(600);
+const box = await page.locator('.canvas-wrap').boundingBox();
+await page.mouse.dblclick(box.x + 400, box.y + 280);
+await page.waitForTimeout(500);
+await page.click('button[aria-label="导出"]');
+await page.waitForTimeout(400);
+// 点画布 8K 图片
+await page.click('.modal button:has-text("画布 8K 图片")');
+await page.waitForTimeout(1500);
+const img = await page.evaluate(() => {
+  const im = document.querySelector('.modal img');
+  return im ? { src: im.src.slice(0, 40), w: im.naturalWidth, h: im.naturalHeight } : null;
+});
+console.log('图片预览:', JSON.stringify(img));
+const nameInput = await page.evaluate(() => { const inp = document.querySelector('.modal input'); return inp ? inp.value : null; });
+console.log('文件名:', nameInput);
+console.log(img && img.w > 0 && /^(blob:|data:image\/png)/.test(img.src) ? '✅ 图片预览正常(blob)' : '❌');
+await browser.close();
+process.exit(0);

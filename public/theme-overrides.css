@@ -1,0 +1,1532 @@
+/* ============================================================
+   创作助手 · 体验优化覆盖层（theme-overrides.css）
+   原则：不改业务逻辑，只做视觉统一 / 布局修复 / 触摸体验
+   加载顺序：在主样式之后引入，同优先级规则以此文件为准
+   ============================================================ */
+
+/* ---------- 全局统一 ---------- */
+
+/* 原生控件跟随主题色（复选框、单选、滑块） */
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+progress {
+  accent-color: var(--accent);
+}
+
+/* 键盘导航焦点环统一 */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* WebView 内点击高亮去除，按压反馈交给既有 :active 缩放 */
+button,
+.btn,
+.tb-btn,
+.sec-item,
+.tpl-item,
+.zc-fab,
+.zc-tool,
+.card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 文本渲染更细腻 */
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- 图标可读性统一 ---------- */
+/* WebView 的按钮原生外观会把 emoji 强制渲染成单色字形（🏷🗑🕒 在彩底上几乎隐形）。
+   显式声明 appearance/背景/边框后恢复正常彩色 emoji 渲染；
+   应用内所有按钮均有类样式（优先级更高），不受此默认值影响。 */
+button {
+  appearance: none;
+  background: transparent;
+  border: none;
+}
+
+/* 彩色卡片顶栏上的图标：不带底衬、不带阴影（用户偏好），彩色化已由 VS16 保证 */
+
+/* ---------- 画布交互优化 ---------- */
+
+/* 连线卡顿修复：卡片去掉 transform/filter 过渡，拖拽时位置 1:1 跟手，
+   连线端点与卡片不再视觉脱节（保留颜色/阴影过渡）。
+   注意：.card-flip-wrap 不能加 will-change —— 会打散 3D 翻转上下文，
+   拖拽时正反两面同时渲染（双影）。 */
+.card {
+  transition: box-shadow 0.18s ease, border-color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+
+/* 顶栏 logo 与标题的光学基线对齐 */
+.tb-logo {
+  transform: translateY(1px);
+}
+
+/* 工具面板（框选/移动/…）标签对比度：muted 太浅、橡皮 8% 红几乎隐形 */
+.zc-tool em {
+  color: var(--text);
+  opacity: 0.72;
+  font-weight: 500;
+}
+.zc-tool.eraser em {
+  color: var(--danger) !important;
+  opacity: 0.9;
+}
+.zc-tool.eraser {
+  color: var(--danger);
+}
+
+/* ---------- AI 助手迷你面板 ---------- */
+/* 底部一排 4 个 48px 同色大按钮 → 发送保持主按钮，⤢🗗✕ 改为紧凑中性图标钮，
+   给输入框腾出空间、明确主次 */
+.ai-mini .ai-input .ai-mini-btn:nth-last-child(-n + 3) {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+.ai-mini .ai-input .ai-mini-btn:nth-last-child(-n + 3):hover {
+  background: var(--panel);
+  color: var(--text);
+}
+.ai-mini {
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+.ai-mini .ai-input {
+  gap: 6px;
+}
+
+/* 滚动条全局统一（细、圆、主题色） */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* 表单控件基线统一（不含 checkbox/radio/range） */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input:not([type]),
+select,
+textarea {
+  min-height: 34px;
+}
+select {
+  cursor: pointer;
+}
+
+/* Toast 胶囊化统一 */
+.toasts > * {
+  border-radius: 999px !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* 🤖 全局 AI 入口：保持全局置顶；弹窗打开时半透明避让，仍可点击 */
+body:has(.modal-mask) .ai-float-btn,
+body:has(.fullscreen-editor) .ai-float-btn,
+body:has(.writing-mode) .ai-float-btn,
+body:has(.sidebar-sheet) .ai-float-btn {
+  opacity: 0.4;
+}
+body:has(.modal-mask) .ai-float-btn:hover,
+body:has(.modal-mask) .ai-float-btn:active,
+body:has(.fullscreen-editor) .ai-float-btn:hover,
+body:has(.fullscreen-editor) .ai-float-btn:active,
+body:has(.writing-mode) .ai-float-btn:hover,
+body:has(.writing-mode) .ai-float-btn:active {
+  opacity: 1;
+}
+
+/* 模态在窄屏上留出呼吸边距 */
+@media (max-width: 640px) {
+  .modal {
+    max-width: calc(100vw - 18px);
+  }
+}
+
+/* ---------- 弹窗通用优化 ---------- */
+/* 弹窗高度贴合内容：设置/导出等短内容弹窗不再留大片底部空白 */
+.modal {
+  height: auto;
+  min-height: 0;
+}
+.modal-body {
+  overflow-y: auto;
+}
+/* 单按钮行占满整行，消除两列网格的空缺感 */
+.modal-body .btn:only-child {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.modal-body div:has(> .btn:only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* ---------- 回收站空态 ---------- */
+.modal-sm .modal-body:has(.muted) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  min-height: 300px;
+  padding: 0 22px;
+}
+.modal-sm .modal-body .muted {
+  font-size: 14px;
+  color: var(--text);
+  opacity: 0.85;
+}
+.modal-sm .modal-body .muted::before {
+  content: "🗑";
+  display: block;
+  font-size: 40px;
+  margin-bottom: 6px;
+}
+.modal-sm .modal-body .hint {
+  font-size: 12px;
+}
+
+/* ---------- 手机端布局修复 ---------- */
+@media (max-width: 640px) {
+  /* 侧栏抽屉 tab：禁止竖排换行 */
+  .sb-tabs {
+    gap: 2px;
+  }
+  .sb-tabs button {
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 10px 2px;
+    letter-spacing: -0.2px;
+  }
+
+  /* 底部状态栏：不再互相挤压换行 */
+  .statusbar {
+    font-size: 10.5px;
+    padding: 0 10px;
+    gap: 8px;
+  }
+  .statusbar > span {
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .statusbar .sb-ver {
+    flex-shrink: 0;
+    font-size: 10px !important;
+    padding: 0 6px !important;
+  }
+  .statusbar .sb-right {
+    gap: 8px;
+    overflow: hidden;
+  }
+  .statusbar .sb-hint {
+    display: none; /* 桌面向提示，手机上让位给保存状态 */
+  }
+
+  /* 右缘竖排工具条：加高上限，避免与 🤖 入口重叠 */
+  .v-toolbar {
+    max-height: calc(100dvh - 210px);
+  }
+  .v-toolbar .page-switcher-btn .ps-name {
+    font-size: 10px;
+  }
+
+  /* 小地图：手机上更轻量 */
+  .minimap {
+    transform: scale(0.8);
+    transform-origin: left bottom;
+    opacity: 0.8;
+  }
+
+  /* 富文本工具栏：更大的触摸目标 + 更紧凑的排布 */
+  .rich-toolbar {
+    gap: 2px;
+    padding: 3px 5px;
+  }
+  .rich-toolbar .rtb {
+    height: 32px;
+    min-width: 30px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+  .rich-toolbar .rtb-select {
+    height: 32px;
+    font-size: 12.5px;
+    border-radius: 8px;
+  }
+  .rich-toolbar .rtb-cat {
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 8px;
+  }
+  .rich-toolbar .rtb-more {
+    height: 32px;
+  }
+}
+
+/* 触摸设备统一按压反馈（工具栏小按钮） */
+@media (pointer: coarse) {
+  .rich-toolbar .rtb:active,
+  .rich-toolbar .rtb-select:active {
+    transform: scale(0.94);
+    background: var(--accent-soft);
+  }
+  .topbar .tb-btn {
+    min-height: 36px;
+  }
+}
+
+/* ============================================================
+   色彩系统（专业调优版）
+   - 全部文本对组合达到 WCAG AA（≥4.5:1），边框可见性 ≥1.25:1
+   - 中性色阶按主题色相统一 tint，明暗主题均有清晰的高程模型
+   - 语义色（ok/danger/warn）在明暗主题下分别校准
+   - --accent-contrast：主按钮上的文字/图标色，深色主题下自动切换深字
+   ============================================================ */
+
+/* ---- 护眼主题（同一标准校准） ---- */
+
+/* 豆沙绿 · 护眼浅色 */
+:root[data-cztheme="green"] {
+  color-scheme: light;
+  --bg: #c9e4c9;
+  --panel: #d9ecd9;
+  --panel2: #cfe5cf;
+  --text: #24312a;
+  --muted: #4d6753;
+  --border: #b3d1b5;
+  --card-bg: #e3f1e3;
+  --grid-dot: #a8cfaa;
+  --editor-bg: #ecf6ec;
+  --shadow: 0 2px 10px rgba(40, 70, 45, 0.12);
+  --shadow-lg: 0 8px 30px rgba(40, 70, 45, 0.2);
+  --overlay: rgba(30, 50, 35, 0.45);
+  --accent: #2f7a4b;
+  --accent2: #6faf8a;
+  --accent-strong: #276440;
+  --accent-contrast: #ffffff;
+  --ok: #1d6e46;
+  --danger: #b23737;
+  --warn: #8a5a10;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* 米白 · 纸质浅色 */
+:root[data-cztheme="paper"] {
+  color-scheme: light;
+  --bg: #f1e9d7;
+  --panel: #faf5e9;
+  --panel2: #eae1cb;
+  --text: #3d352a;
+  --muted: #6a5f4d;
+  --border: #d9cdb2;
+  --card-bg: #fbf6ea;
+  --grid-dot: #d8cbae;
+  --editor-bg: #fdf8ec;
+  --shadow: 0 2px 10px rgba(90, 75, 45, 0.12);
+  --shadow-lg: 0 8px 30px rgba(90, 75, 45, 0.2);
+  --overlay: rgba(60, 48, 28, 0.45);
+  --accent: #8f6128;
+  --accent2: #c29a63;
+  --accent-strong: #74501f;
+  --accent-contrast: #ffffff;
+  --ok: #2e7048;
+  --danger: #ab3535;
+  --warn: #8a5a10;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* 暖夜 · 低饱和暖黑（主按钮用深字保证对比） */
+:root[data-cztheme="warm"] {
+  color-scheme: dark;
+  --bg: #1d1a16;
+  --panel: #27221d;
+  --panel2: #322b24;
+  --text: #ece2d5;
+  --muted: #a99b8b;
+  --border: #3b332b;
+  --card-bg: #292420;
+  --grid-dot: #443b31;
+  --editor-bg: #231f1a;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.55);
+  --overlay: rgba(10, 8, 5, 0.55);
+  --accent: #cf9d5e;
+  --accent2: #dcbb8d;
+  --accent-strong: #e3c296;
+  --accent-contrast: #241b10;
+  --ok: #5cbf87;
+  --danger: #ff8080;
+  --warn: #ffb84d;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* 墨蓝 · 冷静深蓝（主按钮用深字保证对比） */
+:root[data-cztheme="ink"] {
+  color-scheme: dark;
+  --bg: #131822;
+  --panel: #1b2230;
+  --panel2: #242d3e;
+  --text: #dde4f0;
+  --muted: #94a1b8;
+  --border: #2c3547;
+  --card-bg: #1e2735;
+  --grid-dot: #2f3a4c;
+  --editor-bg: #161d28;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.55);
+  --overlay: rgba(4, 8, 14, 0.55);
+  --accent: #6f97ef;
+  --accent2: #94b2f4;
+  --accent-strong: #a9c0f7;
+  --accent-contrast: #0d1420;
+  --ok: #4cc492;
+  --danger: #ff8080;
+  --warn: #ffbb55;
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* 实心主色背景的组件：文字/图标色跟随 --accent-contrast
+   （暖夜/墨蓝下自动切深字，白字对比不达标问题根治） */
+.ai-float-btn,
+.tool-btn.active,
+.multi-bar button.primary,
+.pen-mode.on,
+.layer-select-mode button.active,
+.wm-batch-mini.primary,
+.wm-item-check.on,
+.ai-agent.active,
+.btn.primary,
+.ai-input button,
+.wm-ai-input button,
+.tl-gran button.on,
+.dp-pick.on,
+.hub-tabs button.on,
+.cal-era-tabs button.on,
+.ai-mini .ai-mini-btn:not(:nth-last-child(-n + 3)) {
+  color: var(--accent-contrast);
+}
+.statusbar .sb-ver {
+  color: var(--accent-contrast) !important;
+}
+
+/* 主题切换时的柔和过渡 */
+html[data-cztheme] body,
+html[data-cztheme] .card,
+html[data-cztheme] .topbar,
+html[data-cztheme] .statusbar {
+  transition: background-color 0.25s ease, color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* 🎨 主题切换器（JS 注入） */
+.cz-theme-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.cz-theme-btn:hover {
+  background: var(--panel2);
+}
+.cz-theme-pop {
+  position: fixed;
+  z-index: 48000;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  width: 210px;
+  animation: cz-pop 0.16s ease-out;
+}
+.cz-theme-pop h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.cz-theme-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: 13.5px;
+  cursor: pointer;
+  text-align: left;
+}
+.cz-theme-item:hover {
+  background: var(--panel2);
+}
+.cz-theme-item.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.cz-theme-item .sw {
+  display: inline-flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.cz-theme-item .sw i {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================================
+   动效优化：入场更轻、更短；尊重系统"减少动态效果"
+   ============================================================ */
+@keyframes cz-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.975) translateY(6px);
+  }
+}
+@keyframes cz-toast {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes cz-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .modal {
+    animation: cz-pop 0.16s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  .modal-mask {
+    animation: cz-fade 0.15s ease-out;
+  }
+  .toasts > * {
+    animation: cz-toast 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  .ai-float-panel {
+    animation: cz-pop 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+}
+
+/* 反馈一致性：禁用态统一弱化、列表项按压反馈 */
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.sec-item:active,
+.outline-item:active,
+.page-item:active,
+.tpl-item:active {
+  filter: brightness(0.96);
+}
+
+/* ============================================================
+   横屏（手机高度紧张时）压缩垂直占用的控件
+   ============================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .topbar {
+    padding: 3px 10px;
+    gap: 2px;
+  }
+  .tb-title-row {
+    min-height: 28px;
+  }
+  .tb-logo {
+    font-size: 18px !important;
+  }
+  .statusbar {
+    font-size: 10px;
+    height: 24px;
+  }
+  .v-toolbar {
+    max-height: calc(100dvh - 150px);
+  }
+  .minimap {
+    transform: scale(0.62);
+    opacity: 0.7;
+  }
+  .rich-toolbar .rtb,
+  .rich-toolbar .rtb-select,
+  .rich-toolbar .rtb-cat,
+  .rich-toolbar .rtb-more {
+    height: 28px;
+  }
+  .rich-toolbar .rtb {
+    min-width: 26px;
+    font-size: 12px;
+  }
+  .sb-tabs button {
+    padding: 7px 2px;
+    font-size: 11.5px;
+  }
+  /* 欢迎页横屏留出底边距 */
+  .welcome-card-wrap {
+    margin-bottom: 12px;
+  }
+}
+
+/* ============================================================
+   键鼠/触屏统一：光标语义化（桌面端反馈更明确）
+   ============================================================ */
+.card {
+  cursor: move;
+}
+.card-header {
+  cursor: grab;
+}
+.card-header:active {
+  cursor: grabbing;
+}
+.canvas-wrap {
+  cursor: default;
+}
+.canvas-wrap:active {
+  cursor: grabbing;
+}
+
+/* ============================================================
+   色彩和谐：分区色条柔和化
+   彩色顶栏在画布上大面积平铺时会互相抢戏（颜色打架）。
+   叠一层主题色薄纱把所有分区色压成柔和色调，
+   色相仍可辨识，饱和冲击交给小色点/细线承担。
+   ============================================================ */
+.card-accent {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.52));
+}
+:root[data-theme="dark"] .card-accent {
+  background-image: linear-gradient(rgba(20, 22, 30, 0.4), rgba(20, 22, 30, 0.4));
+}
+:root[data-cztheme="warm"] .card-accent {
+  background-image: linear-gradient(rgba(32, 27, 21, 0.4), rgba(32, 27, 21, 0.4));
+}
+:root[data-cztheme="ink"] .card-accent {
+  background-image: linear-gradient(rgba(18, 23, 33, 0.4), rgba(18, 23, 33, 0.4));
+}
+
+/* 分区色条是内联样式（随项目数据保存），用 ::before 薄纱压色；
+   浅色系薄纱为白纱（图标转深色），深色系为暗纱（保持白图标） */
+.card-topbar {
+  position: relative;
+}
+.card-topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.52);
+  pointer-events: none;
+}
+.card-topbar > * {
+  position: relative;
+  z-index: 1;
+}
+:root[data-theme="dark"] .card-topbar::before {
+  background: rgba(20, 22, 30, 0.42);
+}
+:root[data-cztheme="warm"] .card-topbar::before {
+  background: rgba(32, 27, 21, 0.4);
+}
+:root[data-cztheme="ink"] .card-topbar::before {
+  background: rgba(18, 23, 33, 0.4);
+}
+/* 浅色系：薄纱变浅后，顶栏图标从白字转深字 */
+html:not([data-theme="dark"]):not([data-cztheme="warm"]):not([data-cztheme="ink"]) .card-topbar .card-collapse-btn {
+  color: rgba(0, 0, 0, 0.66);
+}
+html:not([data-theme="dark"]):not([data-cztheme="warm"]):not([data-cztheme="ink"]) .card-topbar .card-collapse-btn:hover {
+  background: rgba(0, 0, 0, 0.09);
+  color: rgba(0, 0, 0, 0.88);
+}
+html:not([data-theme="dark"]):not([data-cztheme="warm"]):not([data-cztheme="ink"]) .card-topbar .card-collapse-btn.active {
+  background: rgba(0, 0, 0, 0.13);
+  color: rgba(0, 0, 0, 0.92);
+}
+
+/* ============================================================
+   点选/选中态强化：工具按钮、色板、滑杆、模式按钮、卡片选中
+   ============================================================ */
+
+/* 工具按钮选中：主题色描边 + 柔光 + 文字点亮，一眼可见 */
+.zc-tool.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel2));
+  box-shadow: 0 0 0 1px var(--accent), 0 2px 10px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.zc-tool.active em {
+  color: var(--accent);
+}
+
+/* 色板选中：白隙 + 主题环 + 微放大（修复原选中环宽度为 0 的 bug） */
+.pen-swatch.on,
+.rtb-swatch.on {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent) !important;
+  transform: scale(1.15);
+  z-index: 1;
+}
+.pen-swatch:hover:not(.on),
+.rtb-swatch:hover:not(.on) {
+  transform: scale(1.1);
+}
+
+/* 滑杆精修：主题色圆钮 + 细圆轨道 */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  margin-top: -6.5px;
+}
+input[type="range"]::-moz-range-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* 画笔/橡皮模式与清空按钮 */
+.pen-mode {
+  border-radius: 10px;
+}
+.pen-mode.on {
+  box-shadow: 0 0 0 1px var(--accent), 0 2px 10px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.pen-mode.danger {
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.pen-mode.danger:hover {
+  background: color-mix(in srgb, var(--danger) 12%, var(--panel));
+}
+
+/* 选中的卡片：主题色描边，选中状态一眼可见 */
+
+/* 缩放手柄：圆角 + 主题描边 + 投影 + 悬停微放大 */
+
+/* ============================================================
+   橡皮面板和谐化：激活态回归主题色语言，红色只保留给"清空"
+   （原来红色描边/红标签/大红按钮与主题紫滑杆互相打架）
+   ============================================================ */
+.zc-tool.eraser.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel2));
+  box-shadow: 0 0 0 1px var(--accent), 0 2px 10px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.zc-tool.eraser.active em {
+  color: var(--accent) !important;
+}
+.pen-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+.pen-mode.on.eraser-on {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.pen-mode.on:not(.eraser-on) {
+  color: var(--accent-contrast);
+}
+
+/* 面板布局收紧：标签/滑杆/按钮对齐，两按钮等宽 */
+.pen-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pen-tools .pen-mode {
+  flex: 1;
+  min-height: 34px;
+}
+.zc-panel {
+  gap: 6px;
+}
+
+/* 缩放数值芯片 */
+.zoom-val {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 7px;
+  min-width: 42px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 选中卡片尺寸徽标（缩放/拖动时显示 宽 × 高） */
+.cz-size-badge {
+  position: absolute; /* 挂到画布容器内，受画布 overflow:hidden 裁剪 + 层叠上下文约束，不再串到其他页面上层 */
+  z-index: 100001; /* 画布上下文内：高于选中卡片(100000)，但被画布层叠隔离，不会盖到侧栏/面板 */
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   设置页布局：分组卡片化 + 行对齐 + 吸底操作栏
+   ============================================================ */
+.modal-body .modal-sec {
+  background: color-mix(in srgb, var(--panel2) 55%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px 14px;
+  margin: 0 0 12px;
+}
+.modal-body .modal-sec > h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  color: var(--accent-strong);
+}
+.modal-body .modal-sec .fld {
+  padding: 6px 0;
+}
+.modal-body .modal-sec .fld.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.modal-body .modal-sec input[type="text"],
+.modal-body .modal-sec input:not([type]),
+.modal-body .modal-sec select {
+  background: var(--panel);
+  border-color: var(--border);
+}
+.modal-actions {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(transparent, var(--panel) 45%);
+  padding: 10px 0 2px;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   统一交互反馈（2026-09）：点击 / 长按 / 按压态
+   原则：
+   · 按下即有反应（缩放+底色加深），拖动/滚动不误触
+   · 长按由 JS 加 .cz-press（持续按压 250ms 仍未移动）→ 更明显的确认视觉
+   · 尊重 prefers-reduced-motion（降级为纯底色变化）
+   · 画布卡片 / 画布空白不在此列（拖拽、橡皮筋等交互由业务处理）
+   ============================================================ */
+
+/* 按下即收缩反馈：按钮 / 可点击行 / 菜单项（触屏为主，桌面 hover 同样生效） */
+button:not(:disabled):active,
+.btn:not(:disabled):active,
+[role="button"]:active,
+.clickable:active {
+  transform: scale(0.965);
+}
+button,
+.btn,
+[role="button"],
+.clickable,
+.sec-item,
+.page-item,
+.outline-item,
+.tpl-item,
+.tab-btn,
+.tl-item,
+.cal-day-item,
+.cal-add-btn,
+.cal-nav-btn,
+.hub-tabs button,
+.sb-tabs button,
+.tabs button,
+.welcome-book-face,
+.ai-quick,
+.menu-item {
+  transition: transform 0.09s ease, background-color 0.09s ease,
+    filter 0.09s ease, opacity 0.12s ease;
+}
+
+/* 列表行 / 卡片格按压：底色加深（与缩放叠加，反馈更清晰） */
+.sec-item:active,
+.page-item:active,
+.outline-item:active,
+.tpl-item:active,
+.tl-item:active,
+.cal-day-item:active,
+.cal-add-btn:active,
+.cal-nav-btn:active,
+.hub-tabs button:active,
+.sb-tabs button:active,
+.welcome-book-face:active,
+.ai-quick:active,
+.menu-item:active {
+  background: var(--panel2);
+  filter: brightness(0.97);
+}
+
+/* 长按中（JS 在按满 250ms 未移动时添加）：保持按压视觉并轻微加深 */
+.cz-press {
+  filter: brightness(0.93) !important;
+}
+
+/* 长按已识别（JS 在即将弹菜单/触发功能时添加约 350ms）：主题色勾勒确认 */
+.cz-longpress {
+  box-shadow: 0 0 0 2px var(--accent) !important;
+  transform: scale(0.975);
+}
+
+/* 桌面端 hover 语义：可点击处给手型（补充系统默认覆盖） */
+button:not(:disabled),
+[role="button"],
+.clickable,
+.tab-btn,
+.tl-item,
+.cal-day-item,
+.welcome-book-face {
+  cursor: pointer;
+}
+.sec-item:active,
+.page-item:active,
+.outline-item:active {
+  cursor: pointer;
+}
+
+/* 减少动态效果：按压不缩放，仅底色反馈 */
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):active,
+  .btn:not(:disabled):active,
+  [role="button"]:active,
+  .clickable:active,
+  .cz-press {
+    transform: none;
+  }
+  button,
+  .btn,
+  [role="button"],
+  .clickable {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   UI 规范统一层 v1（2026-09）
+   依据 docs/UI-SPEC.md：补齐令牌阶梯，统一次要控件规格。
+   只统一规格（圆角/高度/内边距/字号），不改布局结构。
+   ============================================================ */
+
+/* ---- 令牌补齐（圆角5档 / 间距4档 / 字号5档 / 控件高度） ---- */
+:root {
+  --radius-xs: 4px;
+  --radius-md: 12px; /* 覆盖原 12px（若与既有值冲突，后定义者优先生效于 var() 引用） */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-lg: 14px;
+  --fs-title: 16px;
+  --ctrl-h: 34px; /* 控件基准高度 */
+  --row-h: 36px;  /* 列表行基准高度 */
+}
+
+/* ---- 列表行统一（分区/页面/模板/菜单项） ---- */
+.sec-item,
+.page-item,
+.tpl-item,
+.ctx-menu button {
+  min-height: var(--row-h);
+  border-radius: var(--radius-sm);
+  gap: 8px;
+}
+.sec-item > .sec-name,
+.page-item > span,
+.tpl-item > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sec-item .sec-emoji,
+.page-item .pg-emoji,
+.tpl-item .tpl-emoji {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+/* ---- 图标按钮统一（34×34 / 圆角8 / 透明底） ---- */
+.tb-btn,
+.tool-btn,
+.cz-theme-btn,
+.page-switcher-btn,
+.ai-mini-btn,
+.rtb,
+.hub-close,
+.modal-x {
+  min-width: var(--ctrl-h);
+  min-height: var(--ctrl-h);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.tb-btn:not(.active):hover,
+.tool-btn:not(.active):hover,
+.ai-mini-btn:hover {
+  background: var(--panel2);
+  color: var(--text);
+}
+
+/* ---- 标签 / 徽章统一（胶囊 / 11px / 20px 高） ---- */
+.tb-badge,
+.sb-ver,
+.cal-day,
+.chip-rank,
+.wm-side-badge,
+.ai-log-badge,
+.cal-pay-badge,
+.welcome-book-type-badge {
+  font-size: var(--fs-xs);
+  height: 20px;
+  line-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* ---- 面板 / 弹窗标题层级统一 ---- */
+.tl-title b,
+.hub-title b,
+.modal h2,
+.welcome h1 {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+.tl-title-sub,
+.welcome p {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+/* ---- 按钮组布局统一（横向排布 + 8px 间距） ---- */
+.modal-actions,
+.tl-detail-actions,
+.ai-mini .ai-input {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.ctx-menu button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+/* ---- 表单对齐统一（标签列 + 控件伸展） ---- */
+.modal-sec .fld > label:first-child {
+  min-width: 84px;
+  color: var(--text);
+  font-weight: 500;
+}
+.fld.row input[type="text"],
+.fld.row select,
+.modal-sec .fld.row input:not([type]),
+.modal-sec .fld.row select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- 数字列统一等宽（统计/缩放/字数） ---- */
+.zoom-val,
+.sb-sel,
+.sb-sync,
+.cal-count,
+.ps-count,
+.sec-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 空态统一（居中 + 大图标 + 说明） ---- */
+.hint,
+.empty {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.modal-body .hint,
+.modal-body .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+/* ---- 空态补丁：所有「muted pad」式空提示统一为规范空态 ---- */
+.muted.pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 14px;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.empty-icon {
+  font-size: 34px;
+  line-height: 1;
+  filter: saturate(0.85);
+  opacity: 0.9;
+}
+
+/* ---- 弹窗标题统一（ModalShell h3 与统一层对齐） ---- */
+.modal-head h3 {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ---- 回收站行统一 ---- */
+.trash-item {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px 4px 10px;
+}
+.trash-item > button {
+  width: var(--ctrl-h);
+  height: var(--ctrl-h);
+  min-width: var(--ctrl-h);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.trash-toolbar {
+  gap: var(--sp-2);
+}
+.trash-toolbar .btn {
+  margin-left: 0;
+}
+.proj-item {
+  border-radius: var(--radius-sm);
+}
+.proj-item:hover {
+  background: var(--panel2);
+}
+.proj-item .proj-main span {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+/* ============================================================
+   说明文字设计系统 v1（2026-09）
+   原则：说明文字 = 层次分明的信息层级，而非灰墙
+   · 弹窗注脚：分隔线 + 💡 + 12px 灰（与正文区分离）
+   · 帮助步骤：accent 竖条标题 + 正文 13px 1.8
+   · 键值行：键位等宽 chip 左列 + 描述右列 + 隔行底色
+   · 说明中的强调词：主题色 600（替代视觉混杂的默认加粗）
+   ============================================================ */
+
+/* ---- 1. 弹窗注脚（modal-body 末尾的说明段落） ---- */
+.modal-body > p.hint:last-child {
+  position: relative;
+  margin: 12px 0 2px;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.modal-body > p.hint:last-child::before {
+  content: "💡";
+  margin-right: 5px;
+}
+
+/* ---- 2. 说明中的强调词 ---- */
+.hint b,
+.hint strong,
+.help-body p b,
+.help-body p strong {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+/* ---- 3. 帮助步骤标题：accent 竖条 + 主文字色（不再整条紫色） ---- */
+.help-body h4 {
+  position: relative;
+  padding-left: 12px;
+  margin: 18px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+}
+.help-body h4::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.help-body h4:first-child {
+  margin-top: 0;
+}
+
+/* ---- 4. 帮助正文排版 ---- */
+.help-body p {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+}
+.help-body {
+  max-width: 660px;
+}
+
+/* ---- 5. 键值行表格化（键位 chip + 隔行底色，扫读更轻松） ---- */
+.help-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.help-row:nth-child(even) {
+  background: color-mix(in srgb, var(--panel2) 55%, transparent);
+}
+.help-row code {
+  min-width: 190px;
+  flex-shrink: 0;
+  text-align: center;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.help-row span {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- 6. 帮助 Tab 与标题区对齐 ---- */
+.help-tabs {
+  padding: 0 14px 10px;
+  gap: 4px;
+}
+
+/* ---- 7. 设置 / 面板内说明文字统一 ---- */
+.modal-sec .hint,
+.fld .hint,
+.set-hint,
+.tb-hint,
+.ai-hint {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.modal-sec .hint {
+  margin: 6px 0 8px;
+}
+
+/* ============================================================
+   说明/文本截断修复 + 反馈动效补全 v1.1（2026-09）
+   · 键位 chip 不再截断（长键位自动换行）
+   · 信息行 hover/过渡反馈（不再"看起来像控件却无反应"）
+   · Tab/chip 状态切换带过渡动效
+   · 内容预览类文本 单行 → 2~3 行（可见更多，不丢信息）
+   ============================================================ */
+
+/* ---- 1. 键位 chip：允许换行，杜绝省略号截断 ---- */
+.help-row code {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.5;
+  min-width: 190px;
+  max-width: 220px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+/* ---- 2. 信息行 hover + 过渡反馈 ---- */
+.help-row {
+  transition: background 0.15s ease;
+}
+.help-row:hover {
+  background: color-mix(in srgb, var(--panel2) 85%, transparent);
+}
+.help-row:hover code {
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--panel2));
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  color: var(--accent);
+}
+
+/* ---- 3. 帮助 Tab 切换动效 ---- */
+.help-tabs button {
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.09s ease;
+  border-radius: var(--radius-sm);
+}
+.help-tabs button:not(.active):hover {
+  background: color-mix(in srgb, var(--panel2) 60%, transparent);
+  color: var(--text);
+}
+
+/* ---- 4. 徽章/胶囊类：状态变化平滑过渡 ---- */
+.chip-ev,
+.chip-note,
+.chip-rank,
+.chip-rel {
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+/* ---- 5. 内容预览类：单行截断 → 多行可见 ---- */
+.history-desc {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.5;
+  padding: 2px 0;
+}
+.ai-his-msg-preview {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.5;
+}
+.ai-text.clamp {
+  -webkit-line-clamp: 3;
+}
+
+/* ============================================================
+   卡片式区块 v1.2（2026-09）
+   说明/设置类信息页 → 模块化卡片（圆角+边框+内边距）
+   ============================================================ */
+
+/* ---- 帮助弹窗：每个功能区块一张卡 ---- */
+.help-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.help-card:last-child {
+  margin-bottom: 0;
+}
+
+/* 卡内标题：accent 强调色（替代卡外的竖条样式） */
+.help-card h4 {
+  padding-left: 0;
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  line-height: 1.5;
+}
+.help-card h4::before {
+  display: none;
+}
+
+/* 卡内正文 */
+.help-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+/* 卡内键值行：更淡的斑马纹 + 统一内边距 */
+.help-card .help-row {
+  padding: 7px 8px;
+  margin: 0;
+}
+.help-card .help-row:nth-child(even) {
+  background: color-mix(in srgb, var(--panel2) 45%, transparent);
+}
+.help-card .help-row:hover {
+  background: color-mix(in srgb, var(--panel2) 75%, transparent);
+}
+
+/* ---- 设置弹窗分组：同款卡片化 ---- */
+.modal-sec {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.modal-sec:last-child {
+  margin-bottom: 0;
+}
+.modal-sec h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+/* ============================================================
+   弹窗卡片化 v1.3（2026-09）
+   · 覆盖 styles.css 3885「模态框全屏」规则（窄屏 height:100dvh、圆角0）
+   · 所有弹窗统一为居中圆角卡片，高度随内容自适应
+   · 内容多时在 86dvh 内滚动，不再占满整屏、不再大片空白
+   ============================================================ */
+.modal {
+  width: min(660px, 94vw);
+  max-width: 94vw;
+  height: auto;
+  max-height: 86dvh;
+  border-radius: var(--radius-lg);
+}
+.modal-sm {
+  width: min(420px, 60vw);
+  max-width: 94vw;
+}
+.modal-x {
+  flex-shrink: 0;
+}
+
+/* 折叠卡片（帮助弹窗）：标题行可点击，箭头指示状态 */
+.help-card {
+  cursor: default;
+}
+.help-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+.help-card-head h4 {
+  margin: 0;
+  flex: 1;
+}
+.help-card-head::after {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transform-origin: 50% 50%;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+  margin: -3px 2px 0 0;
+}
+.help-card.open .help-card-head::after {
+  transform: rotate(-135deg);
+  margin: 2px 2px 0 0;
+  border-color: var(--accent);
+}
+.help-card-head:hover h4 {
+  color: var(--accent);
+}
+.help-card-body {
+  margin-top: 2px;
+  padding-top: 4px;
+}

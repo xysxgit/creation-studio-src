@@ -1,0 +1,20 @@
+node_modules/
+dist/
+data/
+data-backups/
+*.log
+*.tmp
+.DS_Store
+tests/*.tmpdir
+
+apk-dist/
+android/.gradle/
+android/app/build/
+dkfile-deploy.zip
+src/styles.css.bak-scroll
+创作助手.zip
+edgeone-deploy.zip
+
+# 私有签名密钥，勿提交
+*.keystore
+/release/

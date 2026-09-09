@@ -1,0 +1,31 @@
+import { chromium } from 'playwright';
+const CHROME = '/root/.cache/ms-playwright/chromium-1234/chrome-linux/chrome';
+const browser = await chromium.launch({ headless: true, executablePath: CHROME, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await page.goto('http://localhost:8787/');
+await page.waitForSelector('.welcome', { timeout: 8000 });
+await page.evaluate(() => { localStorage.clear(); localStorage.setItem('cs.helpSeen', '1'); });
+await page.reload();
+await page.waitForSelector('.welcome');
+await page.click('text=＋ 新建项目');
+await page.click('.type-card:has-text("小说")');
+await page.click('.modal-actions .btn.primary');
+await page.waitForSelector('.canvas-wrap');
+await page.waitForTimeout(500);
+await page.click('.zc-fab'); await page.waitForTimeout(300);
+const emInfo = await page.evaluate(() => {
+  const tools = [...document.querySelectorAll('.zc-tool')];
+  return tools.map((t) => {
+    const em = t.querySelector('em');
+    const cs = em ? getComputedStyle(em) : null;
+    return { name: em?.textContent, active: t.classList.contains('active'), color: cs?.color, fs: cs?.fontSize, visible: cs ? cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.fontSize) > 0 : false };
+  });
+});
+console.log('工具em信息:', JSON.stringify(emInfo));
+await page.click('.zc-tool:has-text("画笔")'); await page.waitForTimeout(300);
+const after = await page.evaluate(() => [...document.querySelectorAll('.zc-tool')].map((t) => ({ name: t.querySelector('em')?.textContent, active: t.classList.contains('active') })));
+console.log('点击画笔后:', JSON.stringify(after));
+const sidebar = await page.evaluate(() => ({ left: !!document.querySelector('.sidebar-left'), right: !!document.querySelector('.sidebar-right'), outline: !!document.querySelector('.outline-panel') }));
+console.log('画布界面侧栏:', JSON.stringify(sidebar));
+await browser.close();
+process.exit(0);

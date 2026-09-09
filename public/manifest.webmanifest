@@ -1,0 +1,24 @@
+{
+  "name": "创作助手 · 剧本工坊",
+  "short_name": "创作助手",
+  "description": "画板式剧本创作工具：小说、轻小说、RPG、Galgame、影视脚本，局域网协同创作",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#f5f6fa",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+
+import { chromium } from 'playwright';
+const CHROME='/root/.cache/ms-playwright/chromium-1234/chrome-linux/chrome';
+const b=await chromium.launch({headless:true,executablePath:CHROME,args:['--no-sandbox']});
+const p=await(await b.newContext({viewport:{width:1280,height:800}})).newPage();
+await p.goto('http://localhost:8787/');
+await p.waitForSelector('.welcome');
+await p.evaluate(()=>{localStorage.clear();localStorage.setItem('cs.helpSeen','1');});
+await p.reload();
+await p.waitForSelector('.welcome');
+await p.click('text=＋ 新建项目');
+await p.click('.type-card:has-text("小说")');
+await p.click('.modal-actions .btn.primary');
+await p.waitForSelector('.canvas-wrap');
+await p.waitForTimeout(500);
+const btns=await p.evaluate(()=>[...document.querySelectorAll('.tb-btn')].map(b=>({t:b.getAttribute('title'),txt:b.textContent.trim(),vis:!!(b.offsetParent)})));
+console.log('=== 顶栏按钮 ===');
+btns.forEach(x=>console.log(JSON.stringify(x)));
+await p.click('button[title="导出"]').catch(e=>console.log('导出点击失败'+e));
+await p.waitForTimeout(500);
+const modal=await p.evaluate(()=>({open:!!document.querySelector('.modal'),sec:!!document.querySelector('.modal-sec'),txt:document.querySelector('.modal')?.textContent.slice(0,200)||''}));
+console.log('=== modal ===', JSON.stringify(modal));
+await b.close();
