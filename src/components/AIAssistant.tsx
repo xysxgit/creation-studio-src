@@ -94,6 +94,27 @@ export default function AIAssistant() {
       window.removeEventListener('ai-ask', q);
     };
   }, []);
+  // 纵深防御：全局拦截点击到危险 scheme 的链接（如 javascript:/vbscript:/data:text/html），
+  // 覆盖 AI 富文本正文、卡片/写作区经由 tiptap 同步/粘贴带入的 <a href>，
+  // 即便某处因解析遗漏产生了这类锚点，也不让它打开/执行。
+  useEffect(() => {
+    const SAFE = /^(https?|mailto)$/i; // 匹配 scheme 名（不含冒号），mailto 同样放行
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a) return;
+      const href = (a.getAttribute('href') || '').trim();
+      if (!href) return;
+      const m = href.match(/^([a-z][a-z0-9+.-]*):/i);
+      if (m && !SAFE.test(m[1])) {
+        // 危险/未知 scheme：阻止默认打开，防止脚本执行或数据外带
+        e.preventDefault();
+        e.stopPropagation();
+        void toast('已拦截不安全链接（' + m[1] + ':）', 'warn');
+      }
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, []);
   // 动态测量顶部栏（TopBar）高度，避免面板被其遮挡
   const [topBarH, setTopBarH] = useState(0);
   useEffect(() => {

@@ -1264,28 +1264,18 @@ export default function CanvasBoard() {
         gestureOn(); // 触控捏合期间持续去闪，抑制卡片 hover/3D 层闪跳
         if ((window as unknown as { __dbg?: boolean }).__dbg) console.log('[pinch] d', d, 'factor', factor, 'dx', dx, 'dy', dy);
         // 锚点换算为相对画布内容区原点的坐标（与 viewport.x/y 同坐标系），否则捏合会漂移
-        const ccEl = wrapRef.current?.querySelector('.canvas-cards');
-        const ccRect = ccEl?.getBoundingClientRect();
-        const rect = wrapRef.current?.getBoundingClientRect();
-        const ox = ccRect?.left ?? rect?.left ?? 0;
-        const oy = ccRect?.top ?? rect?.top ?? 0;
         const vp0 = useStudio.getState().viewport;
         const scaling = !zoomLocked && Math.abs(factor - 1) > 0.004;
         if (scaling) {
-          // 一次性计算新缩放+位移。锚点优先以「选中物件中心」，其次回退到双指中点；dx/dy 保留双指平移。
-          // 这样捏合时选中卡片保持在中心，缩放更可控；无选中则维持以往双指中点为准。
+          // 一次性计算新缩放+位移。锚点优先「选中物件（卡片/连线）中心」——
+          // 有选中时以选中物为中心缩放（符合“缩放我选中的东西”的直觉）；
+          // 未选中任何物件时，回退到双指中点，避免缩放时画面漂移。
+          // dx/dy 保留双指平移增量，捏合与平移可同时生效。
+          const vp0b = useStudio.getState();
+          const anchor = computeZoomAnchor(vp0b, wrapRef.current, { sx: midX, sy: midY, preferSelection: true });
           const zoom = clamp(vp0.zoom * factor, 0.2, 3);
-          const st0 = useStudio.getState();
-          const hasSel = st0.selection.length > 0 || st0.edgeSelection.length > 0;
-          let ax: number, ay: number; // 锚点（相对画布内容区原点）
-          if (hasSel) {
-            const anchor = computeZoomAnchor(st0, wrapRef.current, { preferSelection: true });
-            ax = anchor.cx - anchor.ox;
-            ay = anchor.cy - anchor.oy;
-          } else {
-            ax = midX - ox;
-            ay = midY - oy;
-          }
+          const ax = anchor.cx - anchor.ox; // 锚点（相对画布内容区原点）
+          const ay = anchor.cy - anchor.oy;
           const wx = (ax - vp0.x) / vp0.zoom; // 锚点对应的世界坐标
           const wy = (ay - vp0.y) / vp0.zoom;
           const nx = ax - wx * zoom + dx;

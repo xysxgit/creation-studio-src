@@ -56,10 +56,32 @@ function ensureUniqueName(base: string, taken: Array<string | undefined>): strin
 /** 视口安全护栏：任何路径写 viewport 都经此，保证 x/y 有限、不被甩到空白区（“点缩放乱跳看不到卡片”）。
  *  vp.x/y 是画布 transform 的 translate（单位：屏幕/内容像素）；只做“有限性 + 合理量级上限”防护，
  *  不收紧到会妨碍正常拖动/缩放的范围。NaN/Infinity 一律回退为 0。 */
+/** span 缓存：以 cards 对象引用为 key，卡片集合未变时复用，避免拖拽/缩放每帧 O(n) 全表扫描 */
+let spanCacheKey: Record<string, Card> | null = null;
+let spanCacheVal = 1;
+function cardsSpan(cards: Record<string, Card>): number {
+  if (cards === spanCacheKey) return spanCacheVal;
+  // 单次遍历求包围盒（循环而非 Math.min(...map)，防大数量展开爆栈）
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity, any = false;
+  for (const id in cards) {
+    const c = cards[id];
+    if (!c) continue;
+    any = true;
+    if (c.x < minX) minX = c.x;
+    if (c.y < minY) minY = c.y;
+    const x2 = c.x + c.w, y2 = c.y + c.h;
+    if (x2 > maxX) maxX = x2;
+    if (y2 > maxY) maxY = y2;
+  }
+  const val = any ? Math.max(maxX - minX, maxY - minY, 1) : 1;
+  spanCacheKey = cards;
+  spanCacheVal = val;
+  return val;
+}
+
 function sanitizeViewport(vp: Viewport, cards: Record<string, Card>, fallbackZoom?: number): Viewport {
   const zoom = Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : (Number.isFinite(fallbackZoom) && (fallbackZoom as number) > 0 ? (fallbackZoom as number) : 1);
-  const list = Object.values(cards);
-  const span = list.length ? Math.max(Math.max(...list.map((c) => c.x + c.w)) - Math.min(...list.map((c) => c.x)), Math.max(...list.map((c) => c.y + c.h)) - Math.min(...list.map((c) => c.y)), 1) : 1;
+  const span = cardsSpan(cards);
   // 允许的 |x|/|y| 上限：内容跨度×(2×当前缩放)再乘 200 倍、且不低于 1e5；日常平移远小于此，防甩飞足够
   const bound = Math.max(100000, span * Math.max(zoom, 1) * 200);
   const sx = Number.isFinite(vp.x) ? vp.x : 0;
@@ -573,7 +595,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     const cards = { ...get().cards };
     for (const id of valid) cards[id] = { ...cards[id], groupId: gid, updatedAt: Date.now() };
     set({ groups: { ...get().groups, [gid]: group }, cards });
-    get().persistNow();
+    schedulePersist();
     toast(skipped ? `已编组 ${valid.length} 张卡片，已忽略 ${skipped} 张已在其它编组的卡片` : `已编组 ${valid.length} 张卡片`, 'ok');
     return gid;
   },
@@ -583,7 +605,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     const volName = ensureUniqueName(name || `第 ${Object.values(st.groups).filter((g) => g.writingOnly).length + 1} 卷`, Object.values(st.groups).map((g) => g.name));
     const group: CardGroup = { id: gid, name: volName, color: '#6a5cf5', createdAt: Date.now(), order: Object.keys(st.groups).length, writingOnly: true };
     set({ groups: { ...st.groups, [gid]: group } });
-    get().persistNow();
+    schedulePersist();
     toast(`已新建卷「${volName}」`, 'ok');
     return gid;
   },
@@ -596,7 +618,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     const groups = { ...get().groups };
     delete groups[gid];
     set({ groups, cards, selectedGroupId: get().selectedGroupId === gid ? null : get().selectedGroupId });
-    get().persistNow();
+    schedulePersist();
     toast('已解散编组', 'warn');
   },
   updateGroupName: (gid, name) => {
@@ -610,7 +632,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     const groups = { ...get().groups };
     if (groups[gid]) groups[gid] = { ...groups[gid], ...patch };
     set({ groups });
-    get().persistNow();
+    schedulePersist();
   },
   lockGroup: (gid, locked) => {
     get().pushHistory(locked ? '锁定编组' : '解锁编组');
@@ -620,7 +642,7 @@ export const useStudio = create<StudioState>((set, get) => ({
       if (!c.writingOnly && c.groupId === gid) cards[c.id] = { ...c, locked, updatedAt: ts };
     }
     set({ cards });
-    get().persistNow();
+    schedulePersist();
     toast(locked ? '已锁定组内全部卡片位置' : '已解锁组内卡片', locked ? 'ok' : 'warn');
   },
   groupIdsOf: (ids) => {
@@ -720,7 +742,7 @@ export const useStudio = create<StudioState>((set, get) => ({
       }
     }
     set({ groups: { ...st.groups, [ngid]: group }, cards, edges, selectedGroupId: ngid, selection: [], edgeSelection: [], zTop: st.zTop + newCardIds.length });
-    get().persistNow();
+    schedulePersist();
     toast(`已复制编组「${newName}」（${newCardIds.length} 张卡片）`, 'ok');
     const ops: Op[] = newCardIds.map((nid) => ({ id: uid('op'), client: getClientId(), ts, type: 'card.upsert' as const, payload: { card: cards[nid] } }));
     ops.push(...newEdges.map((e) => ({ id: uid('op'), client: getClientId(), ts, type: 'edge.upsert' as const, payload: { edge: e } })));

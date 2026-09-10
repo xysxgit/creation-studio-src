@@ -1,0 +1,41 @@
+# ============ 创作助手 · 协同服务器 systemd 服务 ============
+# 用法（Linux 服务器，需 root）：
+#   1) 按实际路径修改下面的 WorkingDirectory / ExecStart / User
+#   2) sudo cp deploy/creation-studio-server.service /etc/systemd/system/
+#   3) sudo systemctl daemon-reload
+#   4) sudo systemctl enable --now creation-studio-server
+#   5) 查看状态：sudo systemctl status creation-studio-server
+#   6) 查看日志：journalctl -u creation-studio-server -f
+#
+# 说明：
+#   · Restart=always 崩溃自动拉起；StartLimit 防止疯狂重启。
+#   · Environment 可设置 CORS_ORIGIN / PORT / BODY_LIMIT / RELAY_TIMEOUT_MS。
+#   · 生产用 node 请填绝对路径（如 which node 的结果）。
+
+[Unit]
+Description=Creation Studio Collaboration Server
+After=network.target
+
+[Service]
+Type=simple
+# ↓↓↓ 改成你的实际路径 / 用户 ↓↓↓
+WorkingDirectory=/opt/creation-assistant
+User=www-data
+Environment=NODE_ENV=production
+Environment=PORT=8787
+# 公网部署请取消下一行注释并改成你的来源白名单
+# Environment=CORS_ORIGIN=https://example.com
+# Environment=BODY_LIMIT=200mb
+# Environment=RELAY_TIMEOUT_MS=60000
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=2
+# 给 flushAll() 落盘留出时间（SIGTERM）
+KillSignal=SIGTERM
+TimeoutStopSec=8
+# 简单加固
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

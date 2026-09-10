@@ -50,13 +50,31 @@ function escapeHtml(value) {
 
 const app = express();
 app.disable('x-powered-by');
-app.use(express.json({ limit: '300mb' }));
+// 请求体上限：默认 100mb（足够单个大项目/内嵌图片）。仍可用 BODY_LIMIT 覆盖，
+// 例如 BODY_LIMIT=300mb node server/index.js。之前 300mb 过大，异常大包会瞬时抬高内存。
+const BODY_LIMIT = process.env.BODY_LIMIT || '100mb';
+app.use(express.json({ limit: BODY_LIMIT }));
 
 // CORS：允许 WebView / 第三方 origin 跨域访问（手机 App 云同步 relay、局域网协同、调试控制台）
-// 默认全放开（*），可用环境变量 CORS_ORIGIN 收紧到指定来源。
-const ALLOW_ORIGIN = process.env.CORS_ORIGIN || '*';
+// 安全建议（对外暴露/公网部署时务必收紧）：
+//   * 默认全放开（*）仅便于局域网协同与局域网/调试场景；
+//   * 公网部署或同一服务被不可信页面引用时，用环境变量收紧到指定来源，例如：
+//        CORS_ORIGIN=https://example.com,https://app.example.com node server/index.js
+//     支持用英文逗号分隔多个来源（仅放行列表内 origin，未命中则不下发 CORS 头）。
+//   保持默认 '*' 表示任意站点浏览器都可跨域调用本服务的 API / WebDAV relay / 静态资源。
+const ALLOWED_ORIGINS = String(process.env.CORS_ORIGIN || '*')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const allOriginsOpen = ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes('*');
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', ALLOW_ORIGIN);
+  if (allOriginsOpen) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    const origin = req.headers.origin;
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    }
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PROPFIND,MKCOL');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,Depth,X-Requested-With');
   res.setHeader('Access-Control-Max-Age', '86400');
@@ -70,6 +88,27 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  // Content-Security-Policy：保守加固，不锁死 script/style/img（WebView 内联样式、
+  // blob/data 图片、以及用户自建 AI 网关都要能跑），只禁掉最危险的能力：
+  //   object/embed 插件、<base> 劫持、被外站 iframe 嵌套、form 外发。
+  // 如需更严格的脚本策略，可在此基础上自行收紧 script-src / connect-src。
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      // 保留宽放：内联脚本/样式（构建注入）、data:/blob: 图片与媒体、任意 http(s) 连接（AI 网关/WebDAV）
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data:",
+      "media-src 'self' data: blob: https: http:",
+      "connect-src 'self' http: https: ws: wss:",
+    ].join('; ')
+  );
   if (req.path.startsWith('/api/')) {
     res.setHeader('Cache-Control', 'no-store');
   }
@@ -161,11 +200,22 @@ app.post('/api/relay', async (req, res) => {
     if (auth) headers.Authorization = auth;
     if (contentType) headers['Content-Type'] = contentType;
     if (extraHeaders) for (const [k, v] of Object.entries(extraHeaders)) headers[k] = v;
-    const r = await fetch(url, { method, headers, body: body !== undefined ? body : undefined });
+    // 上游超时：避免云盘/网关长时间不响应时挂死连接（默认 60s，可用 RELAY_TIMEOUT_MS 覆盖）
+    const timeoutMs = Number(process.env.RELAY_TIMEOUT_MS || 60000);
+    const r = await fetch(url, {
+      method,
+      headers,
+      body: body !== undefined ? body : undefined,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
     const text = await r.text();
     res.json({ ok: r.ok, status: r.status, text });
   } catch (e) {
-    res.status(502).json({ ok: false, status: 502, text: String(e.message || e) });
+    const msg = (e && (e.name === 'TimeoutError' || e.name === 'AbortError'))
+      ? `上游超时（>${process.env.RELAY_TIMEOUT_MS || 60000}ms）`
+      : String(e.message || e);
+    log('warn', 'relay', `failed: ${method} ${url}`, msg);
+    res.status(502).json({ ok: false, status: 502, text: msg });
   }
 });
 
@@ -207,12 +257,20 @@ app.get('/apk/', (_req, res) => {
 
 // ---------- 静态前端 ----------
 if (fs.existsSync(DIST_DIR)) {
-  // 静态前端强制每次重新验证，避免 App 缓存旧版（色块选中态修复）
+  // 静态前端：HTML 强制不缓存（App/浏览器总拿最新入口），
+  // 但 Vite 产物 /assets/ 下的文件名带内容哈希 → 可长缓存 immutable，减少重复下载、加快启动。
   app.use(express.static(DIST_DIR, {
     maxAge: 0,
     etag: true,
     setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-store');
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-store');
+      } else if (/[/\\]assets[/\\]/.test(filePath)) {
+        // 内容哈希文件名 → 永久缓存（内容变则文件名变，不会拿到旧版）
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+      }
     },
   }));
 }
@@ -432,6 +490,13 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`   安卓下载页：    http://${ip}:${PORT}/apk/`);
   }
   console.log('   数据目录：', DATA_DIR);
+  if (allOriginsOpen) {
+    console.warn('   ⚠ CORS 当前为全放开(*) —— 适合局域网/调试。');
+    console.warn('     若需对外/公网部署，请用 CORS_ORIGIN 收紧到你的来源白名单，例如：');
+    console.warn('       CORS_ORIGIN=https://example.com node server/index.js');
+  } else {
+    console.log(`   ✔ CORS 已收紧到白名单：${ALLOWED_ORIGINS.join(', ')}`);
+  }
   console.log('');
   snapshotBackup(); // 启动时立即做一次初始快照
 });

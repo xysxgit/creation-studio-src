@@ -9,8 +9,8 @@ android {
         applicationId "io.creation.studio.native"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 211
-        versionName "a16"
+        versionCode 213
+        versionName "a16.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // Kotlin 编译目标与 Java 17 对齐
         kotlinOptions {

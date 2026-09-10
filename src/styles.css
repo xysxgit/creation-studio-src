@@ -132,12 +132,36 @@ code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-siz
 .app { height: var(--app-h, 100%); display: flex; flex-direction: column; }
 .app-main { flex: 1; display: flex; min-height: 0; }
 
+/* ============ 性能：常驻浮层毛玻璃的“手势降级” ============
+   顶栏/侧栏/状态栏常驻贴在画布之上，而画布拖动/缩放时每帧都在动，
+   若这些浮层常驻 backdrop-filter，浏览器必须逐帧重算其背后模糊 —— 这是 WebView 里最主要的一处合成开销。
+   策略：静态时保留毛玻璃观感；一旦进入手势（body.cs-zooming，由 CanvasBoard 挂载）就临时切为不透明纯色，
+   手势结束自动恢复。既有观感又保住帧率。 */
+body.cs-zooming .topbar,
+body.cs-zooming .sidebar-left,
+body.cs-zooming .sidebar-right,
+body.cs-zooming .statusbar {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--panel) !important;
+}
+
+/* ============ 性能：卡片 3D 上下文的“手势降级” ============
+   .card { perspective: 1200px } 会让每张卡都常驻一个 3D 上下文；画布拖动/缩放时，
+   浏览器要为大量卡片逐帧重建 3D 合成层（CanvasBoard 注释里“抑制 3D 层逐帧重建”即指此）。
+   策略：静态时保留 perspective（翻转动画正常）；手势期间（body.cs-zooming）临时关闭，
+   让卡片退化为 2D 合成，缩放结束自动恢复。
+   注意：这里只关 .card 的 perspective，绝不碰 .card-flip 的 preserve-3d/backface-visibility
+   —— 一旦拍平会把图片卡反面穿模闪出（见本文件末尾“去闪加固”注释）。 */
+body.cs-zooming .card {
+  perspective: none !important;
+}
+
 /* ============ 顶栏 ============ */
 .topbar {
   background: color-mix(in srgb, var(--panel) 82%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
-  will-change: backdrop-filter;
   border-bottom: none;
   display: flex;
   flex-direction: column;
@@ -269,7 +293,6 @@ code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-siz
   background: color-mix(in srgb, var(--panel) 80%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
-  will-change: backdrop-filter;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -4138,7 +4161,6 @@ code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-siz
   background: color-mix(in srgb, var(--panel) 80%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
-  will-change: backdrop-filter;
   display: flex;
   align-items: center;
   justify-content: space-between;

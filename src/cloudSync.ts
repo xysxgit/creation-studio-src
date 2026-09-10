@@ -22,7 +22,34 @@ interface RelayBody {
   headers?: Record<string, string>;
 }
 
+/** 轻量退避重试：仅对「瞬时错误」重试（网络错误 status=0、超时、5xx），最多 extra 次。 */
+function transient(status: number, text: string): boolean {
+  if (status === 0) return true; // 网络错误/超时/被中断
+  if (status >= 500 && status <= 599) return true;
+  const t = (text || '').toLowerCase();
+  return t.includes('timeout') || t.includes('network') || t.includes('failed to fetch') || t.includes('aborted');
+}
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 async function request(
+  settings: CloudSettings,
+  method: string,
+  path: string,
+  body?: string,
+  extraHeaders?: Record<string, string>,
+): Promise<{ ok: boolean; status: number; text: string }> {
+  // 弱网/云盘偶发 5xx 时退避重试（指数退避，最多 2 次重试），失败仍按原语义返回，不改变调用方判断。
+  const MAX_RETRY = 2;
+  let last: { ok: boolean; status: number; text: string } = { ok: false, status: 0, text: '' };
+  for (let attempt = 0; attempt <= MAX_RETRY; attempt++) {
+    last = await requestOnce(settings, method, path, body, extraHeaders);
+    if (last.ok || !transient(last.status, last.text)) return last;
+    if (attempt < MAX_RETRY) await sleep(400 * Math.pow(2, attempt)); // 400ms, 800ms
+  }
+  return last;
+}
+
+async function requestOnce(
   settings: CloudSettings,
   method: string,
   path: string,

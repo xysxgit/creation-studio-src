@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============ 发布版（收紧）网络安全配置模板 ============
+  现用的 network_security_config.xml 为「局域网协同 / 自建 AI 网关」放开了明文 HTTP，
+  这对功能是必需的。若要发布一个「默认不允许明文、仅白名单放行」的收紧密版本，
+  使用本模板：
+
+  用法（二选一）：
+    1) 发版构建前，把它复制成（去掉 .template 后缀）覆盖当前配置：
+         cp android/templates/network_security_config.release.xml.template \
+            android/app/src/main/res/xml/network_security_config.xml
+       注意：Android 资源文件名只能含 小写字母/数字/下划线，不能带点号
+       （所以模板放在 res/ 外并带 .template 后缀，避免被 Gradle 当作资源合并而报错）；
+    2) 或在 android/app/build.gradle 的 release buildType 中通过
+       resValue/manifestPlaceholders 切换 manifest 引用的 @xml 资源。
+
+  说明：
+    · base-config 设为 cleartextTrafficPermitted="false"，即默认只允许 HTTPS；
+    · 局域网协同服务器（自建 HTTP）与自建 AI 网关（Ollama/LM Studio/OpenWebUI 等 HTTP）
+      需把它们的 IP / 域名逐条加进下面白名单，否则对应功能会被系统拦截；
+    · 若你希望发布版仍保留开箱即用的局域网协同，请把用户可能用到的网段/主机列全，
+      或继续沿用当前宽松版配置（LAN 工具类 App 的常见取舍）。
+-->
+<network-security-config>
+    <!-- 默认：禁止明文，仅 HTTPS -->
+    <base-config cleartextTrafficPermitted="false" />
+
+    <!-- 本机回环：开发/本机网关 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- mDNS / .local 局域网主机（局域网协同常见形式） -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">.local</domain>
+    </domain-config>
+
+    <!-- ↓↓↓ 按需添加：你的局域网协同服务器 / 自建 AI 网关 的固定 IP 或域名 ↓↓↓
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.1.10</domain>
+        <domain includeSubdomains="false">10.0.0.5</domain>
+        <domain includeSubdomains="false">ai.myhome.lan</domain>
+    </domain-config>
+    -->
+</network-security-config>

@@ -20,6 +20,23 @@ function tagify(s: string): string {
   );
 }
 
+/** 允许生成 <a> 的可点击链接 scheme 白名单；其余一律降级为纯文本（防 javascript:/data: 等注入） */
+const SAFE_LINK_SCHEME = /^(https?|mailto):/i;
+/**
+ * 构造安全的链接 href：
+ *  - 裸 URL / 带 scheme 的输入，仅接受 http/https/mailto；
+ *  - 无 scheme 的输入视为裸域名，自动补 https；
+ *  - 否则返回 null（调用方应降级为纯文本，不生成可点击锚点）。
+ */
+function safeHref(raw: string): string | null {
+  const u = raw.replace(/["']/g, '');
+  if (!u) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u)) {
+    return SAFE_LINK_SCHEME.test(u) ? u : null; // 危险/未知 scheme → 拒绝
+  }
+  return `https://${u}`;
+}
+
 /** 行内格式化：行内代码 → 粗体 → 删除线 → 链接 → 斜体 → 裸 URL → 标签 */
 function inline(s: string): string {
   let out = s
@@ -27,8 +44,9 @@ function inline(s: string): string {
     .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
     .replace(/~~([^~\n]+)~~/g, '<s>$1</s>')
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, t: string, u: string) => {
-      const href = /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : `https://${u}`;
-      return `<a href="${href.replace(/["']/g, '')}" rel="noopener" target="_blank">${t}</a>`;
+      const href = safeHref(u);
+      if (!href) return `${t}（${u.replace(/["']/g, '')}）`; // 不安全 scheme：降级为纯文本展示，不可点击
+      return `<a href="${href}" rel="noopener" target="_blank">${t}</a>`;
     })
     .replace(/__([^_\n]+)__/g, '<strong>$1</strong>')
     .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
