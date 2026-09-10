@@ -71,14 +71,14 @@
   <div class="logo">🪄</div>
   <h1>创作助手 · 剧本工坊</h1>
   <p class="tag">画板式剧本创作工具 —— 小说 / 轻小说 / RPG / Galgame / 影视脚本</p>
-  <div class="badge">📦 最新版 <b>v1.29</b></div>
+  <div class="badge">📦 最新版 <b>a16.1.1</b></div>
 </div>
 
 <div class="wrap">
   <div class="card">
 
     <div class="dl">
-      <a class="btn" id="dlBtn" href="/apk/creation-studio.apk" download>⬇ 下载安卓版 APK</a>
+      <a class="btn" id="dlBtn" href="/apk/creation-studio.apk" download>⬇ 下载安卓安装包（离线版）</a>
       <div class="size" id="dlSize">正在读取安装包大小…</div>
     </div>
 
@@ -86,7 +86,7 @@
       <img id="qr" src="/apk/qr.svg" alt="手机扫码下载">
       <div class="t">
         <b>📱 手机扫码下载</b><br>
-        扫码或点击上方按钮即可获取安卓安装包。支持 PWA：浏览器打开首页也可「添加到主屏幕」当 App 用。
+        扫码或点击上方按钮即可获取安卓安装包。也支持网页版：浏览器打开首页即可直接使用，并可「添加到主屏幕」当应用用。
       </div>
     </div>
 
@@ -98,15 +98,15 @@
 
     <div class="divider"></div>
 
-    <div class="sec-t">✨ 本版更新（v1.29）</div>
+    <div class="sec-t">✨ 本版更新（a16.1.1）</div>
     <ul class="news">
-      <li><b>屏蔽边缘左右滑手势</b> — 全面屏返回手势不再误退出应用；上下滑保持系统默认</li>
-      <li><b>AI 生成记录分开</b> — 画布卡片与正文创作的 AI 历史各自独立记录、独立回退</li>
-      <li><b>画布专属「AI 历史」按钮</b> — 顶栏 🤖 一键查看/清空/恢复画布 AI 记录</li>
-      <li><b>顶部布局优化</b> — AI 历史按钮移至第二行最右（设置旁），仅留 🤖 图标</li>
-      <li><b>字数显示位置</b> — 富文本字数紧跟章节标题显示，更顺手</li>
-      <li><b>撤销/重做修复</b> — 严格单步撤销，单个操作可撤，操作有反馈</li>
-      <li><b>版本号自动递增</b> — 每次打包版本号+1，便于追踪</li>
+      <li><b>性能优化</b> — 画面拖动/缩放更跟手：卡片 3D 上下文与顶部毛玻璃在手势期间自动降级，减少逐帧重算</li>
+      <li><b>持久化提速</b> — 自动保存改为防抖落盘，编组类操作不再每步全量写盘，大幅降低卡顿</li>
+      <li><b>双指缩放修复</b> — 以选中的物件为中心缩放，不再偏移漂移</li>
+      <li><b>稳定性加固</b> — 服务器限流与请求体保护、云同步更稳、导出的 HTML 防注入</li>
+      <li><b>部署模板</b> — 新增服务器守护（pm2/systemd）配置，进程崩溃自动拉起</li>
+      <li><b>屏幕方向</b> — 支持跟随系统 / 固定横竖屏</li>
+      <li><b>版本号自动递增</b> — 每次打包版本号自动 +1，便于追踪</li>
     </ul>
 
     <div class="divider"></div>
@@ -130,9 +130,9 @@
     <div class="sec-t">📲 怎么安装</div>
     <ol class="steps">
       <li><span class="nbr">1</span><span>手机与电脑连接<b>同一 Wi-Fi</b>，电脑端保持本页面服务运行（<code>npm start</code>）。</span></li>
-      <li><span class="nbr">2</span><span>用手机<b>扫码</b>或直接点击上方「下载安卓版 APK」。</span></li>
-      <li><span class="nbr">3</span><span>打开下载的 APK，按系统提示允许「<b>安装未知来源应用</b>」。</span></li>
-      <li><span class="nbr">4</span><span>安装完成后打开即可使用，可选择 PWA 或 APK 两种方式。</span></li>
+      <li><span class="nbr">2</span><span>用手机<b>扫码</b>或直接点击上方「下载安卓安装包（离线版）」。</span></li>
+      <li><span class="nbr">3</span><span>打开下载的安装包，按系统提示允许「<b>安装未知来源应用</b>」。</span></li>
+      <li><span class="nbr">4</span><span>安装完成后打开即可使用，也可直接用浏览器打开网页版。</span></li>
     </ol>
 
     <div class="divider"></div>
@@ -145,7 +145,7 @@
     </ol>
 
     <div class="footer">
-      🪄 创作助手 · 剧本工坊 v1.29 · 局域网分发版<br>
+      🪄 创作助手 · 剧本工坊 a16.1.1 · 局域网分发版<br>
       数据保存在电脑服务器 <code>data/</code> 目录；AI 密钥仅存本机浏览器。
     </div>
   </div>
@@ -159,12 +159,12 @@
   fetch('/apk/creation-studio.apk', {method:'HEAD'}).then(function(r){
     var len = r.headers.get('content-length');
     if(len){ var mb = (parseInt(len,10)/1024/1024).toFixed(1);
-      document.getElementById('dlSize').textContent = '安装包大小：' + mb + ' MB · 版本 v1.29 · Debug 签名（测试/内部分发）';
+      document.getElementById('dlSize').textContent = '安装包大小：' + mb + ' MB · 版本 a16.1.1 · 测试签名（内部分发）';
     }
   }).catch(function(){}).finally(function(){
     // 若没拿到大小也给默认文案
     var el = document.getElementById('dlSize');
-    if(!el.textContent || el.textContent.indexOf('正在')===0) el.textContent = 'Debug 签名，用于测试/内部分发';
+    if(!el.textContent || el.textContent.indexOf('正在')===0) el.textContent = '测试签名，用于内部测试/分发';
   });
   // 二维码指向本页
   var qr = document.getElementById('qr');
