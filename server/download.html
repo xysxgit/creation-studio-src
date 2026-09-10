@@ -31,6 +31,8 @@
   .dl .btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(108,92,231,.45)}
   .dl .btn:disabled{background:#b8b0e8;box-shadow:none;cursor:not-allowed}
   .dl .size{color:var(--muted);font-size:13px;margin-top:12px}
+  .dl .alt{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:13.5px;color:var(--brand);text-decoration:none;border:1px dashed #c9c3f0;border-radius:10px;padding:8px 16px;transition:background .12s,border-color .12s}
+  .dl .alt:hover{background:#f3f1fd;border-color:var(--brand)}
   .qrrow{display:flex;align-items:center;gap:18px;background:#f0f2f8;border-radius:16px;padding:16px;margin-top:18px}
   .qrrow img,.qrrow svg{width:132px;height:132px;border-radius:12px;border:1px solid #e5e7f0;background:#fff;flex:0 0 auto}
   .qrrow .t{font-size:13.5px;color:#4a4f5c}
@@ -80,6 +82,7 @@
     <div class="dl">
       <a class="btn" id="dlBtn" href="/apk/creation-studio.apk" download>⬇ 下载安卓安装包（离线版）</a>
       <div class="size" id="dlSize">正在读取安装包大小…</div>
+      <a class="alt" id="altBtn" href="https://gitee.com/xysxg/creation-studio-download/raw/master/creation-studio.apk" target="_blank" rel="noopener">🔁 备用下载（Gitee 镜像）</a>
     </div>
 
     <div class="qrrow">
@@ -130,7 +133,7 @@
     <div class="sec-t">📲 怎么安装</div>
     <ol class="steps">
       <li><span class="nbr">1</span><span>手机与电脑连接<b>同一 Wi-Fi</b>，电脑端保持本页面服务运行（<code>npm start</code>）。</span></li>
-      <li><span class="nbr">2</span><span>用手机<b>扫码</b>或直接点击上方「下载安卓安装包（离线版）」。</span></li>
+      <li><span class="nbr">2</span><span>用手机<b>扫码</b>或点击「下载安卓安装包（离线版）」；若主链接不可用，点「🔁 备用下载（Gitee 镜像）」。</span></li>
       <li><span class="nbr">3</span><span>打开下载的安装包，按系统提示允许「<b>安装未知来源应用</b>」。</span></li>
       <li><span class="nbr">4</span><span>安装完成后打开即可使用，也可直接用浏览器打开网页版。</span></li>
     </ol>
